@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.apppetlife.ui.theme.PetLifeTheme
-// Asegúrate de que esta ruta sea la correcta (apuntando a tu carpeta viewmodel)
+
 import com.example.apppetlife.viewmodel.LoginViewModel
 
 /**
@@ -29,19 +29,18 @@ import com.example.apppetlife.viewmodel.LoginViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    // Inyectamos el ViewModel
+
     loginViewModel: LoginViewModel = viewModel(),
-    // Acciones de navegación que nos pasará el NavHost (siguiente paso)
+
     onLoginSuccess: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    // Observamos los estados (States) del ViewModel
+
     val emailState by loginViewModel.emailState.collectAsState()
     val passwordState by loginViewModel.passwordState.collectAsState()
     val validationState by loginViewModel.validationState.collectAsState()
 
-    // --- Efecto Secundario (Side Effect) ---
-    // Esto "escucha" si la validación fue exitosa para navegar.
+
     LaunchedEffect(validationState) {
         if (validationState.isLoginSuccess) {
             onLoginSuccess() // ¡Llama a la navegación!
@@ -123,7 +122,7 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(32.dp))
 
-            // --- Mensaje de Error General ---
+            // --- Mensaje de Error ---
             if (validationState.isLoginError) {
                 Text(
                     text = validationState.errorMessage,
@@ -151,7 +150,7 @@ fun LoginScreen(
     }
 }
 
-// --- Vista Previa ---
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
