@@ -1,7 +1,9 @@
 package com.example.apppetlife.ui.view
 
 
-import androidx.compose.foundation.BorderStroke // <-- ¡LA LÍNEA QUE FALTABA!
+import androidx.compose.animation.animateContentSize
+
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -30,22 +32,15 @@ import com.example.apppetlife.data.Product
 import com.example.apppetlife.ui.theme.PetLifeTheme
 import com.example.apppetlife.viewmodel.StoreViewModel
 
-// --- 1. Pantalla de la Tienda
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreScreen(
-
     storeViewModel: StoreViewModel = viewModel()
 ) {
-
     val searchQuery by storeViewModel.searchQuery.collectAsState()
     val selectedCategory by storeViewModel.selectedCategory.collectAsState()
     val filteredProducts by storeViewModel.filteredProducts.collectAsState()
-
-
     val categories = storeViewModel.getCategories()
 
     Scaffold(
@@ -64,12 +59,16 @@ fun StoreScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .animateContentSize() // ¡NUEVA ANIMACIÓN!
+        ) {
 
             // --- Barra de Búsqueda ---
             OutlinedTextField(
                 value = searchQuery,
-                // Llamamos al evento del ViewModel
                 onValueChange = { storeViewModel.onSearchQueryChanged(it) },
                 label = { Text("Buscar productos...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
@@ -83,27 +82,37 @@ fun StoreScreen(
             CategoryChips(
                 categories = categories,
                 selectedCategory = selectedCategory,
-                // Llamamos al evento del ViewModel
                 onCategorySelected = { storeViewModel.onCategorySelected(it) }
             )
 
-            // --- Cuadrícula de Productos ---
+            // --- Cuadrícula de Productos (2 Columnas Fijas) ---
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
+
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 1000.dp),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+
+                userScrollEnabled = false
             ) {
+
                 items(filteredProducts) { product ->
-                    ProductCard(product = product, onAddToCart = {})
+                    ProductCard(
+                        product = product,
+                        onAddToCart = {}
+
+                    )
                 }
             }
         }
     }
 }
 
-
+// --- 2. Componentes Reutilizables (Sub-Vistas) ---
 
 @Composable
 fun CategoryChips(
@@ -124,7 +133,6 @@ fun CategoryChips(
                     containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                     contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                 ),
-
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
             ) {
                 Icon(
@@ -138,28 +146,28 @@ fun CategoryChips(
         }
     }
 }
-
 @Composable
 fun ProductCard(
     product: Product,
     onAddToCart: (Product) -> Unit
+
 ) {
     Card(
+
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface // LightGray
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Image(
-
                 painter = painterResource(id = product.imageResId),
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                        .height(120.dp) // <-- ¡Perdón! Este typo también estaba
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             )
 
@@ -202,5 +210,3 @@ fun StoreScreenPreview() {
         StoreScreen()
     }
 }
-
-
