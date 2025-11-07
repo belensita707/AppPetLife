@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -25,52 +25,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// Importamos el Modelo
 import com.example.apppetlife.data.CartItem
 import com.example.apppetlife.data.Product
-// Importamos el Tema
 import com.example.apppetlife.ui.theme.PetLifeTheme
-// Importamos el ViewModel
 import com.example.apppetlife.viewmodel.CartViewModel
 
 /**
- * Pantalla del Carrito (Vista).
- * Es "responsiva" (se estira) como la de Rosa Pastel.
- * Observa el estado del CartViewModel (Guía 11).
+ * Pantalla que muestra los productos en el carrito de compras.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarritoScreen(
-    // ¡Importante! Este ViewModel debe ser el MISMO
-    // que se usa en StoreScreen (ViewModel Compartido - Guía 11)
     cartViewModel: CartViewModel,
     onNavigateBack: () -> Unit
 ) {
-    // Observamos el estado del ViewModel (Guía 11/12)
     val cartItems by cartViewModel.cartItems.collectAsState()
     val totalPrice by cartViewModel.totalPrice.collectAsState()
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background, // Cream
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Mi Carrito") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface // LightGray
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
         },
         bottomBar = {
-            // Solo mostramos la barra inferior si hay items
             if (cartItems.isNotEmpty()) {
                 CartSummary(
                     totalPrice = totalPrice,
-                    onCheckoutClicked = { /* Lógica de pago futura (fuera de alcance) */ }
+                    onCheckoutClicked = { /* Lógica de pago futura */ }
                 )
             }
         }
@@ -81,7 +72,6 @@ fun CarritoScreen(
                 .fillMaxSize()
         ) {
             if (cartItems.isEmpty()) {
-                // Mensaje responsivo si el carrito está vacío
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -93,7 +83,6 @@ fun CarritoScreen(
                     )
                 }
             } else {
-                // Lista de items del carrito
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -102,10 +91,9 @@ fun CarritoScreen(
                     items(cartItems) { item ->
                         CartItemRow(
                             item = item,
-                            // Conectamos las acciones al ViewModel
-                            onIncrease = { cartViewModel.increaseQuantity(item.product) },
-                            onDecrease = { cartViewModel.decreaseQuantity(item.product) },
-                            onRemove = { cartViewModel.removeFromCart(item.product) }
+                            onIncrease = { cartViewModel.changeQuantity(item.product.id, item.quantity + 1) },
+                            onDecrease = { cartViewModel.changeQuantity(item.product.id, item.quantity - 1) },
+                            onRemove = { cartViewModel.removeFromCart(item.product.id) }
                         )
                     }
                 }
@@ -114,10 +102,8 @@ fun CarritoScreen(
     }
 }
 
-// --- Componentes Reutilizables ---
-
 /**
- * Una fila responsiva para un item del carrito.
+ * Muestra una fila con la información de un producto en el carrito.
  */
 @Composable
 private fun CartItemRow(
@@ -130,12 +116,12 @@ private fun CartItemRow(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface // LightGray
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth() // Responsivo
+                .fillMaxWidth()
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -150,9 +136,8 @@ private fun CartItemRow(
 
             Spacer(Modifier.width(16.dp))
 
-            // Columna principal de texto y controles
             Column(
-                modifier = Modifier.weight(1f), // Ocupa el espacio restante
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
@@ -168,7 +153,6 @@ private fun CartItemRow(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                // Controles de Cantidad
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SmallIconButton(icon = Icons.Default.Remove, onClick = onDecrease)
                     Text(
@@ -180,7 +164,6 @@ private fun CartItemRow(
                 }
             }
 
-            // Botón de eliminar
             IconButton(onClick = onRemove) {
                 Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
             }
@@ -189,7 +172,7 @@ private fun CartItemRow(
 }
 
 /**
- * Un botón de ícono pequeño para los controles de +/-
+ * Botón de ícono pequeño para los controles de cantidad.
  */
 @Composable
 private fun SmallIconButton(
@@ -207,7 +190,7 @@ private fun SmallIconButton(
 }
 
 /**
- * La barra inferior responsiva que muestra el total.
+ * Muestra el resumen del total a pagar en la parte inferior.
  */
 @Composable
 private fun CartSummary(
@@ -215,13 +198,13 @@ private fun CartSummary(
     onCheckoutClicked: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(), // Responsivo
+        modifier = Modifier.fillMaxWidth(),
         shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surface
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth() // Responsivo
+                .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -229,7 +212,6 @@ private fun CartSummary(
             Column {
                 Text("Total:", style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    // Formateamos el precio a 2 decimales
                     text = "$${String.format("%.2f", totalPrice)}",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
@@ -248,25 +230,25 @@ private fun CartSummary(
 }
 
 
-// --- Vistas Previas ---
 @Preview(showBackground = true)
 @Composable
 fun CarritoScreenPreview_Empty() {
     PetLifeTheme {
-        // Usamos un ViewModel falso para la preview
-        CarritoScreen(cartViewModel = CartViewModel(), onNavigateBack = {})
+        @Suppress("ViewModelConstructorInComposable")
+        val cartViewModel = CartViewModel()
+        CarritoScreen(cartViewModel = cartViewModel, onNavigateBack = {})
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun CarritoScreenPreview_WithItems() {
-    val previewViewModel = CartViewModel()
-    // Añadimos datos de ejemplo al ViewModel de la preview
-    previewViewModel.addToCart(Product(1, "Pienso Premium Perro", 25.99, "Comida", com.example.apppetlife.R.drawable.ic_launcher_foreground))
-    previewViewModel.addToCart(Product(2, "Pelota de Goma", 5.49, "Juguetes", com.example.apppetlife.R.drawable.ic_launcher_foreground))
-
     PetLifeTheme {
+        @Suppress("ViewModelConstructorInComposable")
+        val previewViewModel = CartViewModel()
+        previewViewModel.addToCart(Product(1, "Pienso Premium Perro", 25.99, "Comida", com.example.apppetlife.R.drawable.ic_launcher_foreground), 1)
+        previewViewModel.addToCart(Product(2, "Pelota de Goma", 5.49, "Juguetes", com.example.apppetlife.R.drawable.ic_launcher_foreground), 1)
+
         CarritoScreen(cartViewModel = previewViewModel, onNavigateBack = {})
     }
 }

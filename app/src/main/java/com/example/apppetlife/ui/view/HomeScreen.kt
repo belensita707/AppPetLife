@@ -22,15 +22,16 @@ import androidx.compose.ui.unit.dp
 import com.example.apppetlife.R
 import com.example.apppetlife.ui.theme.PetLifeTheme
 
+/**
+ * Pantalla de bienvenida que ofrece opciones de registro, inicio de sesión u omitir.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    // Añadí funciones para la navegación futura
     onLoginClicked: () -> Unit = {},
     onRegisterClicked: () -> Unit = {},
     onSkipClicked: () -> Unit = {}
 ) {
-
     val primaryColor = MaterialTheme.colorScheme.primary
     val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -38,12 +39,10 @@ fun HomeScreen(
     val onBackgroundColor = MaterialTheme.colorScheme.onBackground
 
     Scaffold(
-
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(text = "Bienvenido a PetLife") },
-
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -55,61 +54,53 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(16.dp),
-            // Esto empuja el copyright al fondo, como en "Rosa Pastel"
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // --- Botón Omitir ---
             Box(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     onClick = onSkipClicked,
                     modifier = Modifier.align(Alignment.Center),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = surfaceColor, // LightGray
-                        contentColor = onSurfaceColor // DarkText
+                        containerColor = surfaceColor,
+                        contentColor = onSurfaceColor
                     ),
-                    // Borde color 'SoftTeal' (primary)
                     border = BorderStroke(2.dp, primaryColor)
                 ) {
                     Text("Omitir", style = MaterialTheme.typography.bodyLarge)
                 }
             }
 
-            // --- Logo y Botones Principales ---
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Logo App",
+                    painter = painterResource(id = R.drawable.petlife),
+                    contentDescription = "Logo de PetLife",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp),
-                    contentScale = ContentScale.Fit
+                        .height(250.dp)
                 )
 
-                // --- Botón Registrarme ---
                 Button(
                     onClick = onRegisterClicked,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryColor, // SoftTeal
-                        contentColor = onPrimaryColor // DarkText
+                        containerColor = primaryColor,
+                        contentColor = onPrimaryColor
                     ),
                     border = BorderStroke(2.dp, primaryColor)
                 ) {
                     Text("Crear Cuenta", style = MaterialTheme.typography.bodyLarge)
                 }
 
-                // --- Botón Iniciar Sesión ---
                 Button(
                     onClick = onLoginClicked,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = surfaceColor, // LightGray
-                        contentColor = onSurfaceColor // DarkText
+                        containerColor = surfaceColor,
+                        contentColor = onSurfaceColor
                     ),
                     border = BorderStroke(2.dp, primaryColor)
                 ) {
@@ -117,12 +108,11 @@ fun HomeScreen(
                 }
             }
 
-            // --- Copyright ---
             Text(
                 text = "© 2025 PetLife. Todos los derechos reservados.",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
-                color = onBackgroundColor, // DarkText
+                color = onBackgroundColor,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -132,9 +122,6 @@ fun HomeScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    // ¡MUY IMPORTANTE!
-    // Envolvemos el Preview en tu PetLifeTheme
-    // para que el preview use tus colores y fuentes.
     PetLifeTheme {
         HomeScreen()
     }
